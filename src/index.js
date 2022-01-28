@@ -5,11 +5,13 @@ const exphbs = require('express-handlebars');
 const flash = require('connect-flash');
 const session = require('express-session');
 const mySqlStore = require('express-mysql-session');
+const passport = require('passport');
 
 const { database } = require('./keys');
 
 //initializations
 const app = express();
+require('./lib/passport');
 
 //settings
 app.set('port', process.env.PORT || 4000);
@@ -27,13 +29,17 @@ app.set('view engine', '.hbs');
 app.use(morgan('dev'));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
+
 app.use(session({
-    secret: 'appwebmysqlnodesession',
+    secret: 'faztmysqlnodemysql',
     resave: false,
     saveUninitialized: false,
     store: mySqlStore(database)
 }));
 app.use(flash());
+app.use(passport.initialize());
+app.use(passport.session());
+
 
 //Global variables
 app.use((req, res, next) => {
@@ -48,6 +54,7 @@ app.use('/links', require('./routes/links'));
 
 //Public 
 app.use(express.static(path.join(__dirname, 'public')));
+
 //Start server
 app.listen(app.get('port'), () => {
     console.log("server on port: " + app.get('port'));
